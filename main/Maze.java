@@ -1,8 +1,6 @@
 package main;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -15,6 +13,7 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 
 public class Maze {
 	/** The coordinate of the maze's entry point. */
@@ -106,7 +105,6 @@ public class Maze {
 		openCoords.add(start);
 		
 		while(!openCoords.isEmpty()) {
-			System.out.println(openCoords.size());
 			Coord currentCoord = openCoords.pollFirst();
 			if(currentCoord.equals(end))
 				return reconstructPath(cameFrom, currentCoord);
@@ -186,19 +184,33 @@ public class Maze {
 	
 	/* Maze should be in the same directory as the jar file of this project */
 	public static void main(String... args) throws Exception {
-		Path p = Paths.get("maze.png");
+		// System.out.println(Maze.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().substring(1));
+		Path locationOfThisJar = Paths.get(Maze.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().substring(1));
+		Path p = locationOfThisJar.getParent().resolve("maze.png");
 		BufferedImage unsolvedMaze = ImageIO.read(p.toFile());
 		Maze m = new Maze(unsolvedMaze);
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		List<Coord> solution = m.solve();
-		long end = System.currentTimeMillis();
-		System.out.println(solution);
-		System.out.println("Execution took " + (end - start) + " ms.");
-		for(Coord c : solution) {
-				if(m.originalImage.getRGB(c.x, c.y) == 0xff000000)
-					System.err.println("Warning: Algorithm printed over wall!");
-				m.originalImage.setRGB(c.x, c.y, 0xffff0000);
+		long end = System.nanoTime();
+		if(solution.isEmpty()) {
+			JOptionPane.showMessageDialog(null, "No solution found for this maze.");
 		}
-		ImageIO.write(m.originalImage, "png", p.getParent().resolve("solvedmaze2.png").toFile());
+		else {
+			double timePerCell = (double)(end-start)/(1000000*m.originalImage.getWidth()*m.originalImage.getHeight());
+			
+			StringBuilder message = new StringBuilder("Solution found!").append(System.lineSeparator());
+			message.append("Execution of pathfinding algorithm took ").append((end - start)/1000000).append(" ms.").append(System.lineSeparator());
+			message.append("(~").append(timePerCell).append(" ms per cell)");
+			
+			for(Coord c : solution) {
+					if(m.originalImage.getRGB(c.x, c.y) == 0xff000000)
+						System.err.println("Warning: Algorithm printed over wall at (" + c.x + ", " + c.y + ")!");
+					m.originalImage.setRGB(c.x, c.y, 0xffff0000);
+			}
+			
+			ImageIO.write(m.originalImage, "png", locationOfThisJar.getParent().resolve("solvedmaze.png").toFile());
+			
+			JOptionPane.showMessageDialog(null, message);
+		}
 	}
 }
