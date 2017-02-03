@@ -182,9 +182,10 @@ public class Maze {
 		}
 	}
 	
+	
+	/* Maze should be in the same directory as the code */
 	public static void main(String... args) throws Exception {
-		Path desktop = Paths.get(System.getProperty("user.home"), "Desktop");
-		Path p = desktop.resolve("maze.png");
+		Path p = Paths.get("maze.png");
 		BufferedImage unsolvedMaze = ImageIO.read(p.toFile());
 		Maze m = new Maze(unsolvedMaze);
 		long start = System.currentTimeMillis();
@@ -193,10 +194,10 @@ public class Maze {
 		System.out.println(solution);
 		System.out.println("Execution took " + (end - start) + " ms.");
 		for(Coord c : solution) {
-			if(m.originalImage.getRGB(c.x + 1, c.y + 1) == 0xff000000)
-				System.err.println("Warning: Algorithm printed over wall!");
-			m.originalImage.setRGB(c.x + 1, c.y + 1, 0xffff0000);
+				if(m.originalImage.getRGB(c.x, c.y) == 0xff000000)
+					System.err.println("Warning: Algorithm printed over wall!");
+				m.originalImage.setRGB(c.x, c.y, 0xffff0000);
 		}
-		ImageIO.write(m.originalImage, "png", desktop.resolve("solvedmaze2.png").toFile());
+		ImageIO.write(m.originalImage, "png", p.getParent().resolve("solvedmaze2.png").toFile());
 	}
 }
