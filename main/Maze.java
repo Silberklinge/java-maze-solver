@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -183,7 +184,7 @@ public class Maze {
 	}
 	
 	
-	/* Maze should be in the same directory as the code */
+	/* Maze should be in the same directory as the jar file of this project */
 	public static void main(String... args) throws Exception {
 		Path p = Paths.get("maze.png");
 		BufferedImage unsolvedMaze = ImageIO.read(p.toFile());
